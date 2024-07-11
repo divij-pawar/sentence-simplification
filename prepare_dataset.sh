@@ -99,7 +99,17 @@ done
 echo "Files created successfully:"
 
 
+TRAIN=$orig/train.int-ele
 BPE_CODE=$prep/code
-for l in $src $tgt; do
-    cat $tmp/train.$l >> $TRAIN
-done
+rm -f $TRAIN
+cat $tmp/ELE-INT.txt >> $TRAIN
+cat $tmp/train.txt >> $TRAIN
+
+echo "learn_bpe.py on ${TRAIN}..."
+python3 $BPEROOT/learn_bpe.py -s $BPE_TOKENS < $TRAIN > $BPE_CODE
+
+for f in train.txt valid.txt test.txt; do
+        echo "apply_bpe.py to ${f}..."
+        python3 $BPEROOT/apply_bpe.py -c $BPE_CODE < $tmp/$f > $prep/$f
+    done
+echo "Script complete"
