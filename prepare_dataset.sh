@@ -63,3 +63,43 @@ for l in $src $tgt; do
     done
 done
 echo "Pre-processing completed."
+
+# Calculate the number of lines
+total_lines=$(wc -l < "$orig/$src.txt")
+
+# Define split ratios multiplied by 100 to avoid decimals
+train_ratio=70
+val_ratio=15
+test_ratio=15
+
+# Calculate number of lines for each split, dividing by 100 to get actual numbers
+train_lines=$((total_lines * train_ratio / 100))
+val_lines=$((total_lines * val_ratio / 100))
+test_lines=$((total_lines * test_ratio / 100))
+
+# Create train, val, test files
+> "$tmp/train.txt"
+> "$tmp/val.txt"
+> "$tmp/test.txt"
+
+# Iterate over the indices of the arrays (assuming both source and target have the same number of lines)
+for ((i=1; i<=$total_lines; i++)); do
+    src_line=$(sed -n "${i}p" "$orig/int.txt")
+    tgt_line=$(sed -n "${i}p" "$orig/ele.txt")
+
+    if [ $i -le $train_lines ]; then
+        echo "$src_line ||| $tgt_line" >> "$tmp/train.txt"
+    elif [ $i -le $(($train_lines + $val_lines)) ]; then
+        echo "$src_line ||| $tgt_line" >> "$tmp/valid.txt"
+    else
+        echo "$src_line ||| $tgt_line" >> "$tmp/test.txt"
+    fi
+done
+
+echo "Files created successfully:"
+
+
+BPE_CODE=$prep/code
+for l in $src $tgt; do
+    cat $tmp/train.$l >> $TRAIN
+done
