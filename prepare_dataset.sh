@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# echo 'Cloning Moses github repository (for tokenization scripts)...'
-# git clone https://github.com/moses-smt/mosesdecoder.git
+echo 'Cloning Moses github repository (for tokenization scripts)...'
+git clone https://github.com/moses-smt/mosesdecoder.git
 
-# echo 'Cloning Subword NMT repository (for BPE pre-processing)...'
-# git clone https://github.com/rsennrich/subword-nmt.git
+echo 'Cloning Subword NMT repository (for BPE pre-processing)...'
+git clone https://github.com/rsennrich/subword-nmt.git
 
-# echo 'Cloning Fairseq repository ...'
-# git clone https://github.com/facebookresearch/fairseq.git
+echo 'Cloning Fairseq repository ...'
+git clone https://github.com/facebookresearch/fairseq.git
 
 SCRIPTS=mosesdecoder/scripts
 TOKENIZER=$SCRIPTS/tokenizer/tokenizer.perl
@@ -93,28 +93,35 @@ for ((i=1; i<=total_lines; i++)); do
     tgt_line=$(sed -n "${i}p" "$orig/ele.txt")
 
     if [ $i -le $train_lines ]; then
-        echo "$src_line ||| $tgt_line" >> "$tmp/train.txt"
+        echo "$src_line" >> "$tmp/train.$src"
+        echo "$tgt_line" >> "$tmp/train.$tgt"
     elif [ $i -le $(($train_lines + $val_lines)) ]; then
-        echo "$src_line ||| $tgt_line" >> "$tmp/valid.txt"
+        echo "$src_line" >> "$tmp/valid.$src"
+        echo "$tgt_line" >> "$tmp/valid.$tgt"
     else
-        echo "$src_line ||| $tgt_line" >> "$tmp/test.txt"
+        echo "$src_line" >> "$tmp/test.$src"
+        echo "$tgt_line" >> "$tmp/test.$tgt"
     fi
 done
 
-echo "Files created successfully:"
+echo "Files created successfully"
 
 
 TRAIN=$orig/train.int-ele
 BPE_CODE=$prep/code
 rm -f $TRAIN
-cat $tmp/ELE-INT.txt >> $TRAIN
-cat $tmp/train.txt >> $TRAIN
+
+for l in $src $tgt; do
+    cat $tmp/train.$l >> $TRAIN
+done
 
 echo "learn_bpe.py on ${TRAIN}..."
 python3 $BPEROOT/learn_bpe.py -s $BPE_TOKENS < $TRAIN > $BPE_CODE
 
-for f in train.txt valid.txt test.txt; do
+for L in $src $tgt; do
+    for f in train.$L valid.$L test.$L; do
         echo "apply_bpe.py to ${f}..."
         python3 $BPEROOT/apply_bpe.py -c $BPE_CODE < $tmp/$f > $prep/$f
     done
+done
 echo "Script complete"
