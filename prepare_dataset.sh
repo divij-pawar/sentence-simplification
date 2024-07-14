@@ -1,8 +1,13 @@
-#echo 'Cloning Moses github repository (for tokenization scripts)...'
-#git clone https://github.com/moses-smt/mosesdecoder.git
+#!/bin/bash
 
-#echo 'Cloning Subword NMT repository (for BPE pre-processing)...'
-#git clone https://github.com/rsennrich/subword-nmt.git
+# echo 'Cloning Moses github repository (for tokenization scripts)...'
+# git clone https://github.com/moses-smt/mosesdecoder.git
+
+# echo 'Cloning Subword NMT repository (for BPE pre-processing)...'
+# git clone https://github.com/rsennrich/subword-nmt.git
+
+# echo 'Cloning Fairseq repository ...'
+# git clone https://github.com/facebookresearch/fairseq.git
 
 SCRIPTS=mosesdecoder/scripts
 TOKENIZER=$SCRIPTS/tokenizer/tokenizer.perl
@@ -83,7 +88,7 @@ test_lines=$((total_lines * test_ratio / 100))
 > "$tmp/test.txt"
 
 # Iterate over the indices of the arrays (assuming both source and target have the same number of lines)
-for ((i=1; i<=$total_lines; i++)); do
+for ((i=1; i<=total_lines; i++)); do
     src_line=$(sed -n "${i}p" "$orig/int.txt")
     tgt_line=$(sed -n "${i}p" "$orig/ele.txt")
 
