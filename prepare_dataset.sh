@@ -24,8 +24,8 @@ fi
 src=int
 tgt=ele
 lang=int-ele
-prep=prep
-tmp=prep/tmp
+prep=int-ele-sentence-simplification
+tmp=$prep/tmp
 orig=orig
 
 mkdir -p $tmp $prep
